@@ -1,0 +1,13 @@
+[Unit]
+Description=A dynamic dns service on your web space
+Wants=network-online.target
+After=network-online.target
+
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/pobDNSupdate.py 
+ExecStop=killall pobDNSupdate.py
+
+[Install]
+WantedBy=multi-user.target
