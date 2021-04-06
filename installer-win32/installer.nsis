@@ -50,7 +50,7 @@ Section "Install"
 	SetOutPath $INSTDIR
 	;File /r ..\*
 	File ..\prefs.conf
-	File ..\dist\pobDNSupdate.exe
+	File /r ..\dist\pobDNSupdate\*
  
  
 	;Menu start

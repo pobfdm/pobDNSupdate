@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time,os,configparser,sys
 import urllib3
+import shutil
  
  
 currentIP=''
@@ -8,13 +9,14 @@ urlUpdate=''
 user=''
 password=''
 hostname=''
- 
+etcHostsUrl='' 
 
 def getPrefs():
 	global urlUpdate 
 	global user
 	global password
 	global hostname
+	global etcHostsUrl
 	 
 	if  sys.platform == 'linux':
 		try:
@@ -25,6 +27,7 @@ def getPrefs():
 			user=config['DEFAULT']['user']
 			password=config['DEFAULT']['password']
 			hostname=config['DEFAULT']['hostname']
+			etcHostsUrl=config['DEFAULT']['etcHostsUrl'] 
 			return True
 		except Exception as e:
 			print (e.message)
@@ -45,6 +48,7 @@ def getPrefs():
 			user=config['DEFAULT']['user']
 			password=config['DEFAULT']['password']
 			hostname=config['DEFAULT']['hostname']
+			etcHostsUrl=config['DEFAULT']['etcHostsUrl'] 
 			return True
 		except Exception as e:
 			print (e.message)
@@ -61,6 +65,7 @@ def getPrefs():
 			user=config['DEFAULT']['user']
 			password=config['DEFAULT']['password']
 			hostname=config['DEFAULT']['hostname']
+			etcHostsUrl=config['DEFAULT']['etcHostsUrl'] 
 			return True
 		except Exception as e:
 			print (e.message)
@@ -68,10 +73,14 @@ def getPrefs():
  
  
 def getPublicIpRaw():
-	url = "https://api.ipify.org/?format=raw"
-	http = urllib3.PoolManager()
-	r = http.request('GET', url)
-	return r.data
+    url = "http://www.freemedialab.org/myip/rawip.php"
+    http = urllib3.PoolManager()
+    try:
+        r = http.request('GET', url)
+        return r.data
+    except urllib3.exceptions.NewConnectionError:
+        print("Public IP failed")
+        return currentIP    
  
  
 def update():
@@ -82,16 +91,19 @@ def update():
 	
 	if (getPrefs() == True):
 		
-		global currentIP
-		fmlIP=getPublicIpRaw()
-		if (currentIP!=fmlIP):
-			http = urllib3.PoolManager()
-			headers = urllib3.util.make_headers(basic_auth=user+':'+password)
-			r = http.request('GET', urlUpdate + hostname ,headers=headers)
-			currentIP=fmlIP
-			print(str(r.data))
-		else:
-			print("Nothing to update.")
+            global currentIP
+            fmlIP=getPublicIpRaw()
+            if (currentIP!=fmlIP):
+                http = urllib3.PoolManager()
+                headers = urllib3.util.make_headers(basic_auth=user+':'+password)
+                try:
+                    r = http.request('GET', urlUpdate + hostname ,headers=headers)
+                    currentIP=fmlIP
+                    print(str(r.data))
+                except urllib3.exceptions.NewConnectionError:
+                    print("Connection to provider failed!")    
+            else:
+                print("Nothing to update.")
  
 try :
 	if (str(sys.argv[1])=="install"):
@@ -122,7 +134,28 @@ try :
 				
 except  IndexError:
 	print("No Parameter")	
- 
+
+def updateHostsFile():
+    if  sys.platform == 'linux':
+        hostsFile='/etc/hosts'
+    elif sys.platform == 'win32':
+        hostsFile='C:\Windows\System32\drivers\etc\hosts'
+    elif sys.platform == 'darwin':
+        hostsFile='/etc/hosts'
+    
+    if (getPrefs() == True):
+        if(etcHostsUrl is None):
+            return
+        http = urllib3.PoolManager()
+        with open(hostsFile, 'wb') as out:
+            try:
+                r = http.request('GET', etcHostsUrl, preload_content=False)
+                shutil.copyfileobj(r, out)
+                print("%s hosts updated." % hostsFile)
+            except Exception as e:
+                print ("Error on update %s" % hostsFile)
+    
 while(True):
 	update()
+	updateHostsFile()
 	time.sleep(60*5)
