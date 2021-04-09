@@ -5,8 +5,9 @@ After=network-online.target
 
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/python3 /usr/local/bin/pobDNSupdate.py 
+Type=oneshot
+ExecStart=
+ExecStart=/usr/local/bin/pobDNSupdate.py > /var/log/pobDNSupdate
 ExecStop=killall pobDNSupdate.py
 
 [Install]

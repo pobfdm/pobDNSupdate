@@ -95,9 +95,12 @@ def update():
             fmlIP=getPublicIpRaw()
             if (currentIP!=fmlIP):
                 http = urllib3.PoolManager()
-                headers = urllib3.util.make_headers(basic_auth=user+':'+password)
+                headers = urllib3.util.make_headers(basic_auth="'"+user+":"+password+"'")
                 try:
-                    r = http.request('GET', urlUpdate + hostname ,headers=headers)
+                    r = http.request('POST',
+                                     urlUpdate + hostname ,
+                                     fields={'user': user, 'password': password},
+                                     headers=headers)
                     currentIP=fmlIP
                     print(str(r.data))
                 except urllib3.exceptions.NewConnectionError:
@@ -106,31 +109,34 @@ def update():
                 print("Nothing to update.")
  
 try :
-	if (str(sys.argv[1])=="install"):
-		if sys.platform=="win32":
-			
-			if getattr(sys, 'frozen', False):
-				# frozen
-				binfile= os.path.join(os.path.dirname(sys.executable),"pobDNSupdate.exe")
-			else:
-				# unfrozen
-				binfile=os.path.join(os.path.dirname(os.path.realpath(__file__)),"pobDNSupdate.exe")
-			
-			cmd="schtasks /create /tn PobDynDNS /tr \"'%s'\" /sc onstart /RU SYSTEM " % binfile
-			print(cmd)
-			os.system(cmd)
-			os.system("schtasks /run /tn PobDynDNS")
-			input("Press any key to continue...")
-			sys.exit()	
+    
+    if (str(sys.argv[1])=="install"):
+        if sys.platform=="win32":
+
+            if getattr(sys, 'frozen', False):
+                # frozen
+                binfile= os.path.join(os.path.dirname(sys.executable),"pobDNSupdate.exe")
+            else:
+                # unfrozen
+                binfile=os.path.join(os.path.dirname(os.path.realpath(__file__)),"pobDNSupdate.exe")
+
+        cmd="schtasks /create /tn PobDynDNS /tr \"'%s'\" /sc minute /mo 5 /RU SYSTEM " % binfile
+        print(cmd)
+        os.system(cmd)
+        os.system("schtasks /run /tn PobDynDNS")
+        input("Press any key to continue...")
+        sys.exit()	
 	
-	if (str(sys.argv[1])=="remove"):
-		if sys.platform=="win32":
-			cmd="schtasks /delete /tn PobDynDNS /f"
-			print(cmd)
-			os.system(cmd)
-			input("Press any key to continue...")
-			sys.exit()	
-			
+    if (str(sys.argv[1])=="remove"):
+        if sys.platform=="win32":
+            cmd="schtasks /delete /tn PobDynDNS /f"
+            print(cmd)
+            os.system(cmd)
+            input("Press any key to continue...")
+            sys.exit()	
+
+
+        
 				
 except  IndexError:
 	print("No Parameter")	
@@ -155,7 +161,12 @@ def updateHostsFile():
             except Exception as e:
                 print ("Error on update %s" % hostsFile)
     
-while(True):
-	update()
-	updateHostsFile()
-	time.sleep(60*5)
+   
+#while(True):
+#    update()
+#    updateHostsFile()
+#    time.sleep(60*5)
+    
+update()
+updateHostsFile() 
+sys.exit(0)
