@@ -12,20 +12,20 @@ then
     cp pobDNSupdate.timer /usr/lib/systemd/system/
     mkdir /etc/pobDNSupdate/
     cp prefs.conf /etc/pobDNSupdate/ 
-    systemctl enable pobDNSupdate.service
+    #systemctl enable pobDNSupdate.service
     systemctl enable pobDNSupdate.timer
-    systemctl start pobDNSupdate.service
+    #systemctl start pobDNSupdate.service
     systemctl start pobDNSupdate.timer
 fi
 
 
-if [ "$1" = "uninstall" ]
+if [ "$1" = "remove" ]
 then
         echo "Remove all ..."
         systemctl disable pobDNSupdate.timer
-        systemctl disable pobDNSupdate.service
+        #systemctl disable pobDNSupdate.service
         systemctl stop pobDNSupdate.timer
-        systemctl stop pobDNSupdate.service
+        #systemctl stop pobDNSupdate.service
         rm /usr/local/bin/pobDNSupdate.py
         rm /usr/lib/systemd/system/pobDNSupdate.*
         

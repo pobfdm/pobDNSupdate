@@ -1,3 +1,3 @@
 
-pyinstaller -w   pobDNSupdate.py
+pyinstaller   pobDNSupdate.py
 copy .\prefs.conf .\dist\pobDNSupdate\

@@ -94,13 +94,13 @@ def update():
             global currentIP
             fmlIP=getPublicIpRaw()
             if (currentIP!=fmlIP):
-                http = urllib3.PoolManager()
+                http = urllib3.PoolManager(cert_reqs='CERT_NONE')
                 headers = urllib3.util.make_headers(basic_auth="'"+user+":"+password+"'")
                 try:
-                    r = http.request('POST',
-                                     urlUpdate + hostname ,
-                                     fields={'user': user, 'password': password},
-                                     headers=headers)
+                    r = http.request('POST', 
+                                    urlUpdate + hostname ,
+                                    fields={'user': user, 'password': password},
+                                    headers=headers)
                     currentIP=fmlIP
                     print(str(r.data))
                 except urllib3.exceptions.NewConnectionError:
@@ -152,14 +152,14 @@ def updateHostsFile():
     if (getPrefs() == True):
         if(etcHostsUrl is None):
             return
-        http = urllib3.PoolManager()
+        http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         with open(hostsFile, 'wb') as out:
             try:
                 r = http.request('GET', etcHostsUrl, preload_content=False)
                 shutil.copyfileobj(r, out)
                 print("%s hosts updated." % hostsFile)
             except Exception as e:
-                print ("Error on update %s" % hostsFile)
+                print ("Error on update %s : %s" % (hostsFile, e))
     
    
 #while(True):
@@ -169,4 +169,3 @@ def updateHostsFile():
     
 update()
 updateHostsFile() 
-sys.exit(0)
