@@ -7,8 +7,7 @@ After=network-online.target
 [Service]
 Type=oneshot
 ExecStart=
-ExecStart=/usr/local/bin/pobDNSupdate.py > /var/log/pobDNSupdate 2>&1
-ExecStop=killall pobDNSupdate.py
+ExecStart=/usr/local/bin/pobDNSupdate.py > /var/log/pobDNSupdate 
 
 [Install]
 WantedBy=multi-user.target
